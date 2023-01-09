@@ -1,10 +1,10 @@
 /*
- * *    @(#)getopt.c    2.3 (smail) 5/30/87 
+ * *    @(#)figletgetopt.c    2.3 (smail) 5/30/87 
  */
 
 /*
  * Here's something you've all been waiting for:  the AT&T public domain
- * source for getopt(3).  It is the code which was given out at the 1985
+ * source for figletgetopt(3).  It is the code which was given out at the 1985
  * UNIFORUM conference in Dallas. I obtained it by electronic mail directly
  * from AT&T.  The people there assure me that it is indeed in the public
  * domain. 
@@ -13,12 +13,12 @@
  * was slightly different from the current System V Release 2 manual page. 
  * The difference apparently involved a note about the famous rules 5 and 6,
  * recommending using white space between an option and its first argument,
- * and not grouping options that have arguments. Getopt itself is currently
+ * and not grouping options that have arguments. figletgetopt itself is currently
  * lenient about both of these things White space is allowed, but not
  * mandatory, and the last option in a group can have an argument.  That
  * particular version of the man page evidently has no official existence,
  * and my source at AT&T did not send a copy. The current SVR2 man page
- * reflects the actual behavior of this getopt. However, I am not about to
+ * reflects the actual behavior of this figletgetopt. However, I am not about to
  * post a copy of anything licensed by AT&T. 
  */
 
@@ -62,7 +62,7 @@ int             optind = 1;
 int             optopt;
 char           *optarg;
 
-int getopt(int argc, char *argv[], char *opts)
+int figletgetopt(int argc, char *argv[], char *opts)
 {
       static int      sp = 1;
       register int    c;

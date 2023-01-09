@@ -913,7 +913,7 @@ void clearcfilelist()
 
 ****************************************************************************/
 
-extern int getopt(int argc, char *argv[], char *opts);
+extern int figletgetopt(int argc, char *argv[], char *opts);
 
 void getparams()
 {
@@ -949,7 +949,7 @@ void getparams()
   outputwidth = DEFAULTCOLUMNS;
   gn[1] = 0x80;
   gr = 1;
-  while ((c = getopt(Myargc,Myargv,"ADEXLRI:xlcrpntvm:w:d:f:C:NFskSWo"))!= -1) {
+  while ((c = figletgetopt(Myargc,Myargv,"ADEXLRI:xlcrpntvm:w:d:f:C:NFskSWo"))!= -1) {
       /* Note: -F is not a legal option -- prints a special err message.  */
     switch (c) {
       case 'A':
