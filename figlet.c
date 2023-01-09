@@ -1594,7 +1594,59 @@ outchr *string;
     putchar(string[i]==hardblank?' ':string[i]);
 #endif
     }
-  putchar('\n');
+    putchar('\n');
+}
+
+void putrawstring(string)
+outchr *string;
+{
+  int i,len;
+  char c[10];
+#ifdef TLF_FONTS
+  size_t size;
+  wchar_t wc[2];
+#endif
+
+  len = STRLEN(string);
+  if (outputwidth>1) {
+    if (len>outputwidth-1) {
+      len = outputwidth-1;
+      }
+    if (justification>0) {
+      for (i=1;(3-justification)*i+len+justification-2<outputwidth;i++) {
+        putchar(' ');
+        }
+      }
+    }
+  for (i=0;i<len;i++) {
+#ifdef TLF_FONTS
+    wc[0] = string[i];
+    wc[1] = 0;
+    size = wchar_to_utf8(wc,1,c,10,0);
+    if(size==1) {
+      if(c[0]==hardblank) {
+        c[0] = ' ';
+        }
+      }
+    c[size] = 0;
+    printf("%s",c);
+#else
+    (void)c;
+    if(string[i]==hardblank)
+    {
+      putchar(' ');
+    }
+    else if(string[i] == '\\')
+    {
+      putchar('\\');
+      putchar('\\');
+    }
+    else
+    {
+      putchar(string[i]);
+    }
+#endif
+    }
 }
 
 
@@ -1617,18 +1669,42 @@ void printline()
     "\033[40;36m",
     "\033[40;34m",
     "\033[40;35m"
-  };  
+  };
+  static const char *rawColorText[] = {
+    "\\033[40;31m",
+    "\\033[40;33m",
+    "\\033[40;32m",
+    "\\033[40;36m",
+    "\\033[40;34m",
+    "\\033[40;35m"
+  };
+  static const char *colorEndText = "\033[0m";
+  static const char *rawColorEndText = "\\033[0m";  
   static const size_t colorTextSz = sizeof(colorText)/sizeof(*colorText);
 #endif
+
+#ifndef FIGLET_DISABLE_COLORFUL
+    puts("Effect:");
+#endif
+  
   for (i=0;i<charheight;i++) {
 #ifndef FIGLET_DISABLE_COLORFUL
     fputs(colorText[i % colorTextSz],stdout);
 #endif
     putstring(outputline[i]);
 #ifndef FIGLET_DISABLE_COLORFUL
-    fputs("\033[0m",stdout);
+    fputs(colorEndText,stdout);
 #endif
   }
+#ifndef FIGLET_DISABLE_COLORFUL
+  puts("Raw text:");
+  for (i=0;i<charheight;i++) {
+    fputs(rawColorText[i % colorTextSz],stdout);
+    putrawstring(outputline[i]);
+    fputs(rawColorEndText,stdout);
+    putchar('\n');
+  }
+#endif
   clearline();
 }
 
@@ -2023,10 +2099,42 @@ inchr getinchr()
 
 ****************************************************************************/
 
+#ifndef FIGLET_DISABLE_COLORFUL
+#if (defined (_WIN32)) || (defined (_WIN64))
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#endif
+#endif
+
 int main(argc,argv)
 int argc;
 char *argv[];
 {
+
+#ifndef FIGLET_DISABLE_COLORFUL
+#if (defined (_WIN32)) || (defined (_WIN64))
+  {
+    HANDLE stdOutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if(stdOutHandle == INVALID_HANDLE_VALUE)
+    {
+      fputs("Cannot get stdout handle",stderr);
+      return -1;
+    }
+    DWORD mode;
+    if(GetConsoleMode(stdOutHandle,&mode) == FALSE)
+    {
+      fputs("Cannot get console mode",stderr);
+      return -1;
+    }
+    mode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if(SetConsoleMode(stdOutHandle,mode) == FALSE)
+    {
+      fputs("Cannot set console model",stderr);
+      return -1;
+    }
+  }
+#endif
+#endif
   inchr c,c2;
   int i;
   int last_was_eol_flag;
@@ -2041,6 +2149,14 @@ char *argv[];
 ---------------------------------------------------------------------------*/
   int wordbreakmode;
   int char_not_added;
+  puts(
+  "\033[40;31m _____ ___ ____ _     _____ _____ \033[0m\n"
+  "\033[40;33m|  ___|_ _/ ___| |   | ____|_   _|\033[0m\n"
+  "\033[40;32m| |_   | | |  _| |   |  _|   | |  \033[0m\n"
+  "\033[40;36m|  _|  | | |_| | |___| |___  | |  \033[0m\n"
+  "\033[40;34m|_|   |___\\____|_____|_____| |_|  \033[0m\n"
+  "\033[40;35m                                  \033[0m\n"
+  );
 
   Myargc = argc;
   Myargv = argv;
