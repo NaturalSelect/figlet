@@ -34,12 +34,24 @@
 #define NULL    0
 #endif
 
+#include <ctype.h>
+
+static char *MyStrwr(char *str)
+{
+      char *p = str;
+      while (*p != '\0')
+      {
+            *p = (char)tolower(*p);
+      }
+      return str;
+}
+
 #define EOF    (-1)
 #define ERR(s, c)    if(opterr){\
     extern int write(int, void *, unsigned);\
     char errbuf[2];\
     errbuf[0] = (char)c; errbuf[1] = '\n';\
-    (void) write(2, strlwr(argv[0]), (unsigned)strlen(argv[0]));\
+    (void) write(2, MyStrwr(argv[0]), (unsigned)strlen(argv[0]));\
     (void) write(2, s, (unsigned)strlen(s));\
     (void) write(2, errbuf, 2);}
 

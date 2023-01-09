@@ -6,3 +6,5 @@ core
 *~
 tests.log
 *.tar.gz
+/build
+/.vscode

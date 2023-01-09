@@ -54,13 +54,11 @@
 #define DEFAULTFONTDIR "fonts"
 #endif
 #ifndef DEFAULTFONTFILE
-#define DEFAULTFONTFILE "standard.flf"
+#define DEFAULTFONTFILE "standard"
 #endif
 
 #include <stdio.h>
-#ifdef __STDC__
 #include <stdlib.h>
-#endif
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
@@ -552,7 +550,7 @@ inchr *nump;
       *nump = acc * sign;
       return;
       }
-    acc = acc*base+(p-digits);
+    acc = (int)(acc*base+(p-digits));
     }
   *nump = acc * sign;
   }  
@@ -693,6 +691,8 @@ ZFILE *controlfile;
 
 ****************************************************************************/
 
+
+
 ZFILE *FIGopen(name,suffix)
 char *name;
 char *suffix;
@@ -703,8 +703,10 @@ char *suffix;
   int namelen;
 
   namelen = MYSTRLEN(fontdirname);
-  fontpath = (char*)alloca(sizeof(char)*
-    (namelen+MYSTRLEN(name)+MYSTRLEN(suffix)+2));
+  // fontpath = (char*)alloca(sizeof(char)*
+  //   (namelen+MYSTRLEN(name)+MYSTRLEN(suffix)+2));
+  fontpath = (char*)calloc(sizeof(char)*
+    (namelen+MYSTRLEN(name)+MYSTRLEN(suffix)+2),sizeof(char));
   fontfile = NULL;
   if (!hasdirsep(name)) {  /* not a full path name */
     strcpy(fontpath,fontdirname);
@@ -719,10 +721,12 @@ char *suffix;
   strcat(fontpath,suffix);
   if(stat(fontpath,&st)==0) goto ok;
 
+  free(fontpath);
   return NULL;
 
 ok:
   fontfile = Zopen(fontpath,"rb");
+  free(fontpath);
   return fontfile;
 }
 
@@ -908,6 +912,8 @@ void clearcfilelist()
   bounds.
 
 ****************************************************************************/
+
+extern int getopt(int argc, char *argv[], char *opts);
 
 void getparams()
 {
@@ -1584,6 +1590,7 @@ outchr *string;
     c[size] = 0;
     printf("%s",c);
 #else
+    (void)c;
     putchar(string[i]==hardblank?' ':string[i]);
 #endif
     }
@@ -1602,10 +1609,26 @@ outchr *string;
 void printline()
 {
   int i;
-
+#ifndef FIGLET_DISABLE_COLORFUL
+  static const char *colorText[] = {
+    "\033[40;31m",
+    "\033[40;33m",
+    "\033[40;32m",
+    "\033[40;36m",
+    "\033[40;34m",
+    "\033[40;35m"
+  };  
+  static const size_t colorTextSz = sizeof(colorText)/sizeof(*colorText);
+#endif
   for (i=0;i<charheight;i++) {
+#ifndef FIGLET_DISABLE_COLORFUL
+    fputs(colorText[i % colorTextSz],stdout);
+#endif
     putstring(outputline[i]);
-    }
+#ifndef FIGLET_DISABLE_COLORFUL
+    fputs("\033[0m",stdout);
+#endif
+  }
   clearline();
 }
 
